@@ -1,0 +1,131 @@
+version: '3'
+
+volumes:
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      device: /home/tjo/data/wordpress
+      o: bind
+      type: none
+  mariadb:
+    name: mariadb
+    driver: local
+    driver_opts:
+      device: /home/tjo/data/mariadb
+      o: bind
+      type: none
+    
+networks:
+  sans:
+    name: sans
+    driver: bridge
+
+services:
+  mariadb:
+    build: ./build/mariadb/.
+    container_name: mariadb
+    image: mariadb:sans
+    env_file:
+      - ./envs.env
+    volumes:
+      - mariadb:/var/lib/mysql
+    networks:
+      - sans
+    restart: always
+
+  wordpress:
+    container_name: wordpress
+    image: wordpress:sans
+    volumes:
+      - wordpress:/var/www/html
+    build: ./build/wordpress/.
+    depends_on:
+      - mariadb
+    env_file: 
+      - ./envs.env
+    restart: always
+    networks:
+      - sans
+
+  nginx:
+    container_name: nginx
+    image: nginx:sans
+    volumes:
+      - wordpress:/var/www/html
+    build: ./build/nginx/.
+    depends_on:
+      - mariadb
+      - wordpress
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+    networks:
+      - sans
+    env_file:
+      - envs.env
+
+# bonus
+
+  redis:
+    container_name: redis
+    image: redis:sans
+    volumes:
+    - wordpress:/var/www/html
+    build: ./build/redis
+    networks:
+    - sans
+    restart: always
+    depends_on:
+    - wordpress
+
+  ftp:
+    container_name: ftp
+    image: ftp:sans
+    volumes:
+    - wordpress:/home/wasans/ftp/files
+    build: ./build/ftp
+    env_file:
+    - ./envs.env
+    depends_on:
+    - wordpress
+    ports:
+      - "21:21"
+      - "20:20"
+      - "40000-40100:40000-40100"
+    networks:
+    - sans
+    restart: always
+
+  adminer:
+    container_name: adminer
+    image: adminer:sans
+    build: ./build/adminer
+    depends_on:
+    - mariadb
+    ports:
+    - "442:80"
+    networks:
+    - sans
+    restart: always
+
+  mywebsite:
+    container_name: mywebsite
+    image: mywebsite:sans
+    build: ./build/mywebsite
+    ports:
+    - "3000:3000"
+    networks:
+    - sans
+    restart: always
+
+  code-server:
+    container_name: code-server
+    image: code-server:sans
+    build: ./build/code-server
+    ports:
+    - "8080:8080"
+    networks:
+    - sans
+    restart: always

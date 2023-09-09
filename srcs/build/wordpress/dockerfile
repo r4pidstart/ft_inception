@@ -1,0 +1,9 @@
+FROM debian:buster
+
+RUN apt update && \
+    apt install php-fpm php-mysql curl -y
+
+COPY ./wp-config.php /
+COPY ./install.sh /
+
+CMD bash install.sh

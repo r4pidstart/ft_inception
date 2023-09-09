@@ -1,0 +1,8 @@
+FROM debian:buster
+RUN apt update && \
+    apt install nodejs npm curl -y
+
+COPY ./mysite ./
+COPY ./install.sh ./
+CMD bash install.sh
+# CMD npm install -g n; n stable; npm install; npm start;

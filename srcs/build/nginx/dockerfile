@@ -1,0 +1,8 @@
+FROM debian:buster
+RUN apt update && \
+    apt install nginx openssl -y
+
+COPY ./install.sh /
+COPY ./default /etc/nginx/sites-available/
+
+CMD bash install.sh

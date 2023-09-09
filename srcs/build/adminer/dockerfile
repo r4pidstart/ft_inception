@@ -1,0 +1,7 @@
+FROM debian:buster
+RUN apt update && \
+    apt install wget php php-mysql -y
+
+COPY ./install.sh /
+
+CMD bash install.sh

@@ -1,0 +1,8 @@
+FROM debian:buster
+RUN apt update && \
+    apt install vsftpd -y
+
+COPY ./install.sh /
+COPY ./vsftpd.conf /etc/vsftpd.conf
+
+CMD bash install.sh
